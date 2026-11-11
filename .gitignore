@@ -14,3 +14,7 @@ Desktop.ini
 
 # 注意：mcp/node_modules 与 mcp/dist 需随仓库分发
 # （ZCode 安装后直接运行 dist 并加载依赖，安装过程不执行 npm install / 构建），请勿排除
+
+# npm 依赖不入库（官方市场惯例）；从 git 市场安装后需在 mcp/ 下执行 npm install
+mcp/node_modules/
+db-connector/mcp/node_modules/

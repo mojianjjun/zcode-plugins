@@ -13,6 +13,14 @@ ZCode 插件：让 AI 在会话中安全连接数据库，执行**只读**查询
 
 通过插件市场安装本插件（依赖 Node.js ≥ 18，由 ZCode 作为 MCP 服务器启动）。
 
+> **直接从 Git 市场安装注意**：仓库不含 npm 依赖（`node_modules`）。安装后需在插件目录的 `mcp/` 下执行一次 `npm install`，MCP 服务器才能启动：
+>
+> ```bash
+> # 插件安装目录通常位于（版本号以实际为准）：
+> # ~/.zcode/cli/plugins/cache/<市场名>/db-connector/<版本>/mcp
+> npm install
+> ```
+
 ## 快速开始
 
 安装后直接对话即可，例如：

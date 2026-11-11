@@ -13,6 +13,14 @@ A ZCode plugin that lets the AI safely connect to databases in the session for *
 
 Install via the plugin marketplace (requires Node.js ≥ 18; ZCode launches it as an MCP server).
 
+> **Note for installing directly from a Git marketplace**: the repository does not include npm dependencies (`node_modules`). After installation, run `npm install` once inside the plugin's `mcp/` directory before the MCP server can start:
+>
+> ```bash
+> # The installed plugin usually lives at (version may differ):
+> # ~/.zcode/cli/plugins/cache/<marketplace>/db-connector/<version>/mcp
+> npm install
+> ```
+
 ## Quick Start
 
 Just talk to the AI after installation, for example:
