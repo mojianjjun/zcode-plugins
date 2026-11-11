@@ -1,53 +1,46 @@
 # db-connector
 
-[简体中文](README.md) | [English](README_EN.md)
+English | [简体中文](README_CN.md)
 
-ZCode 插件：让 AI 在会话中安全连接数据库，执行**只读**查询与结构浏览。
+A ZCode plugin that lets the AI safely connect to databases in the session for **read-only** queries and schema browsing.
 
-- 支持数据库：**MySQL / MariaDB、PostgreSQL、MongoDB**
-- 插件形式：MCP 服务器（10 个工具）+ Skill 使用指导
-- 多环境多连接：dev/test/prod 等环境分组，每个环境可混合多种数据库
-- 安全：严格只读白名单校验、参数绑定强制、密码仅环境变量引用、行数/超时上限
+- Databases: **MySQL / MariaDB, PostgreSQL, MongoDB**
+- Composition: MCP server (10 tools) + a Skill with usage guidance
+- Multi-environment, multi-connection: group connections by environment (dev/test/prod...), mixing database types freely
+- Security: strict read-only statement whitelist, mandatory parameter binding, passwords stored only as environment-variable references, row/time limits
+- Self-contained: the MCP server ships as a single bundled file — no `npm install` needed after installation
 
-## 安装
+## Installation
 
-通过插件市场安装本插件（依赖 Node.js ≥ 18，由 ZCode 作为 MCP 服务器启动）。
+Install via the plugin marketplace (requires Node.js ≥ 18; ZCode launches it as an MCP server).
 
-> **直接从 Git 市场安装注意**：仓库不含 npm 依赖（`node_modules`）。安装后需在插件目录的 `mcp/` 下执行一次 `npm install`，MCP 服务器才能启动：
+## Quick Start
+
+Just talk to the AI after installation, for example:
+
+> "Use db-connector to add a MySQL connection: environment dev, name mysql-main, database shop, password in the DB_DEV_PW environment variable."
 >
-> ```bash
-> # 插件安装目录通常位于（版本号以实际为准）：
-> # ~/.zcode/cli/plugins/cache/<市场名>/db-connector/<版本>/mcp
-> npm install
-> ```
-
-## 快速开始
-
-安装后直接对话即可，例如：
-
-> "用 db-connector 帮我添加一个 MySQL 连接：环境 dev、名字 mysql-main、库 shop，密码放环境变量 DB_DEV_PW。"
+> "List all tables in the dev environment."
 >
-> "列出 dev 环境所有的表。"
->
-> "统计上个月每天的订单量。"
+> "Count daily orders for last month."
 
-## 连接配置
+## Connection Configuration
 
-### 方式一：对话配置（推荐）
+### Option 1: conversational setup (recommended)
 
-AI 调用 `db_add_connection` 完成配置。密码只接受**变量名**（写入为 `${VAR}` 引用，插件拒绝明文密码），变量统一在 `.env` 文件中定义（系统环境变量不参与解析）：
+The AI calls `db_add_connection` for you. Passwords accept a **variable name only** (written as a `${VAR}` reference; plaintext passwords are rejected). Variables are defined in `.env` files (system environment variables are never read):
 
 ```bash
-# 位置：工作区 .env 或用户级 ~/.zcode/db-connector/.env
-DB_DEV_PW=你的密码
-DB_PROD_PW="带空格 或 #符号 的密码请加引号"
+# Location: workspace .env or user-level ~/.zcode/db-connector/.env
+DB_DEV_PW=your-password
+DB_PROD_PW="quote passwords containing spaces or # characters"
 ```
 
-`${VAR}` 解析优先级：**工作区 `.env` > 用户级 `.env`**。`.env` 每次工具调用都会重新读取、保存即生效；工作区 `.env` 记得加入 `.gitignore`。
+`${VAR}` resolution order: **workspace `.env` > user-level `.env`**. The `.env` files are re-read on every tool call — saving is enough, no restart needed. Remember to gitignore the workspace `.env`.
 
-### 方式二：直接编辑配置文件
+### Option 2: edit the config file directly
 
-工作区级 `<workspace>/db-connections.json`（项目相关）或用户级 `~/.zcode/db-connector/connections.json`（跨项目），两者可并存，按"环境名+连接名"合并，工作区优先：
+Workspace-level `<workspace>/db-connections.json` (per project) or user-level `~/.zcode/db-connector/connections.json` (across projects). Both may coexist; they are merged by "environment name + connection name" with the workspace taking precedence:
 
 ```json
 {
@@ -56,7 +49,7 @@ DB_PROD_PW="带空格 或 #符号 的密码请加引号"
   "defaults": { "rowLimit": 200, "maxRowLimit": 1000, "timeoutMs": 10000 },
   "environments": {
     "dev": {
-      "description": "本地开发",
+      "description": "local development",
       "connections": {
         "mysql-main": {
           "type": "mysql", "host": "localhost", "port": 3306,
@@ -73,7 +66,7 @@ DB_PROD_PW="带空格 或 #符号 的密码请加引号"
       }
     },
     "prod": {
-      "description": "生产环境",
+      "description": "production",
       "protected": true,
       "connections": {
         "mysql-main": { "type": "mysql", "host": "10.0.0.2", "user": "ro_user",
@@ -84,52 +77,65 @@ DB_PROD_PW="带空格 或 #符号 的密码请加引号"
 }
 ```
 
-- 工具的连接引用：`"mysql-main"`（活动环境）或 `"prod/mysql-main"`（显式跨环境）
-- `protected: true` 环境的查询结果会附带醒目的受保护环境提示
-- 密码 `${VAR}` 引用的解析优先级：工作区 `.env` > `~/.zcode/db-connector/.env`（不读取系统环境变量）
+- Connection references: `"mysql-main"` (active environment) or `"prod/mysql-main"` (explicit cross-environment)
+- Queries against `protected: true` environments carry a prominent protected-environment banner
+- Password `${VAR}` resolution order: workspace `.env` > `~/.zcode/db-connector/.env` (system environment variables are not read)
 
-## MCP 工具
+## MCP Tools
 
-| 类别 | 工具 | 说明 |
-|------|------|------|
-| 配置 | `db_list_connections` | 按环境列出连接（脱敏） |
-| 配置 | `db_add_connection` | 新增连接（密码只收环境变量名） |
-| 配置 | `db_remove_connection` | 删除连接 |
-| 配置 | `db_set_active_environment` | 切换活动环境 |
-| 查询 | `db_test_connection` | 连通性测试 |
-| 查询 | `db_list_tables` | 表/集合列表与行数估计 |
-| 查询 | `db_describe_table` | 列/类型/键/索引（Mongo 采样推断） |
-| 查询 | `db_query` | 只读 SQL（MySQL `?` / PG `$1` 参数绑定） |
-| 查询 | `db_find` | MongoDB 只读查询 |
-| 查询 | `db_aggregate` | MongoDB 聚合（拒绝 $out/$merge） |
+| Category | Tool | Description |
+|----------|------|-------------|
+| Config | `db_list_connections` | List connections by environment (masked) |
+| Config | `db_add_connection` | Add a connection (password accepts a variable name only) |
+| Config | `db_remove_connection` | Remove a connection |
+| Config | `db_set_active_environment` | Switch the active environment |
+| Query | `db_test_connection` | Connectivity test |
+| Query | `db_list_tables` | Table/collection listing with row estimates |
+| Query | `db_describe_table` | Columns/types/keys/indexes (inferred by sampling for Mongo) |
+| Query | `db_query` | Read-only SQL (MySQL `?` / PG `$1` parameter binding) |
+| Query | `db_find` | MongoDB read-only queries |
+| Query | `db_aggregate` | MongoDB aggregation ($out/$merge rejected) |
 
-## 安全模型
+## Security Model
 
-1. **只读白名单**：仅放行单条 `SELECT / WITH / EXPLAIN / SHOW / DESCRIBE / DESC`；写/DDL 关键词、多语句、锁定子句、危险函数（文件读写/延时/跨库执行）即使出现在子查询或注释中也被拒绝
-2. **参数绑定强制**：查询值只能经 `params` 传入，服务器代码不做任何 SQL 值拼接
-3. **凭证不落盘**：配置只存 `${ENV_VAR}` 引用；工具输出与日志全程脱敏
-4. **资源保护**：行数与超时三层可配置（`defaults` → 连接级 → 查询参数），`maxRowLimit` 硬上限
-5. 建议为每个环境使用**只读数据库账号**，效果最佳
+1. **Read-only whitelist**: only single `SELECT / WITH / EXPLAIN / SHOW / DESCRIBE / DESC` statements pass; write/DDL keywords, multi-statements, locking clauses and dangerous functions (file access/delays/cross-database execution) are rejected even inside subqueries or comments
+2. **Mandatory parameter binding**: query values go through `params` only; the server never concatenates values into SQL
+3. **No secrets at rest**: configs store only `${ENV_VAR}` references; tool output and logs are masked throughout
+4. **Resource protection**: row limits and timeouts are configurable at three levels (`defaults` → connection → query parameter), with a hard `maxRowLimit` ceiling
+5. For best results, use **read-only database accounts** for every environment
 
-## 行数与超时配置
+## Row Limit & Timeout Configuration
 
-| 层级 | 位置 | 缺省 |
-|------|------|------|
-| 全局默认 | `defaults.rowLimit` / `defaults.timeoutMs` | 200 / 10000ms |
-| 连接覆盖 | 连接对象内 `rowLimit` / `timeoutMs` | 继承全局 |
-| 查询临时 | 工具参数 `limit` | 受 `maxRowLimit`（缺省 1000）封顶 |
+| Level | Location | Default |
+|-------|----------|---------|
+| Global default | `defaults.rowLimit` / `defaults.timeoutMs` | 200 / 10000ms |
+| Connection override | `rowLimit` / `timeoutMs` in a connection object | inherits global |
+| Per-query | tool parameter `limit` | capped by `maxRowLimit` (default 1000) |
 
-## 已知限制
+## Known Limitations
 
-- 仅查询数据，不含任何写入/DDL 能力（设计如此）
-- 关键词白名单可能误伤个别含保留词列名的合法查询（如名为 `set` 的列），可给列名加引号别名后重试
-- 大结果集会在驱动层缓冲后截断，超时由 `timeoutMs` 兜底
+- Query-only by design; no write/DDL capability at all
+- The keyword whitelist may occasionally reject a legitimate query whose column names contain reserved words (e.g. a column named `set`); quote/alias the column and retry
+- Large result sets are buffered by the driver then truncated; `timeoutMs` is the final backstop
 
-## 开发
+## Disclosure
+
+- **Network**: outbound connections are made only to the database hosts the user configures (MySQL/PostgreSQL/MongoDB ports); the plugin makes no other network calls
+- **Process**: ZCode starts one MCP server process via `node mcp/dist/db-connect-server.bundle.cjs` (stdio)
+- **File writes**: only `~/.zcode/db-connector/connections.json`, `~/.zcode/db-connector/.env`, and the workspace-level `db-connections.json` / `.env`; nothing else is written
+- **Secrets**: passwords are never stored in plaintext — only `${ENV_VAR}` references resolved from `.env` files at call time
+- **Third-party code**: the bundle embeds [mysql2](https://github.com/sidorares/node-mysql2) (MIT), [node-postgres](https://github.com/brianc/node-postgres) (MIT) and the [MongoDB Node driver](https://github.com/mongodb/node-mongodb-native) (Apache-2.0); their license notices are kept inline in the bundled file
+
+## Development
 
 ```bash
 cd mcp
 npm install
-npm run build   # tsc 编译到 dist/
-npm test        # 冒烟测试（无需真实数据库）
+npm run build    # tsc compile to dist/
+npm run bundle   # rebuild the self-contained dist/db-connect-server.bundle.cjs
+npm test         # smoke tests (no real database needed)
 ```
+
+## License
+
+[Apache-2.0](LICENSE)

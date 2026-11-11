@@ -2,7 +2,7 @@
   "mcpServers": {
     "db-connector": {
       "command": "node",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp/dist/db-connect-server.js"]
+      "args": ["${ZCODE_PLUGIN_ROOT}/mcp/dist/db-connect-server.bundle.cjs"]
     }
   }
 }

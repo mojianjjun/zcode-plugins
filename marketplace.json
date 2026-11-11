@@ -5,7 +5,7 @@
     {
       "name": "db-connector",
       "source": "./db-connector",
-      "version": "0.1.2",
+      "version": "0.1.3",
       "description": "只读连接 MySQL/PostgreSQL/MongoDB：多环境多连接配置、参数绑定安全查询与结构浏览",
       "displayName": "DB Connector",
       "displayName_i18n": {
