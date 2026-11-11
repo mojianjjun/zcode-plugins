@@ -1,0 +1,16 @@
+# 扫描/运行产物
+.mimosa/
+*.log
+
+# 系统文件
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# 编辑器
+.idea/
+.vscode/
+*.swp
+
+# 注意：mcp/node_modules 与 mcp/dist 需随仓库分发
+# （ZCode 安装后直接运行 dist 并加载依赖，安装过程不执行 npm install / 构建），请勿排除

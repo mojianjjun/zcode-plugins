@@ -1,0 +1,20 @@
+{
+  "name": "zcode-plugins",
+  "description": "默言（mojianjjun）的 ZCode 插件市场：db-connector 数据库只读连接插件",
+  "plugins": [
+    {
+      "name": "db-connector",
+      "source": "./db-connector",
+      "version": "0.1.2",
+      "description": "只读连接 MySQL/PostgreSQL/MongoDB：多环境多连接配置、参数绑定安全查询与结构浏览",
+      "displayName": "DB Connector",
+      "displayName_i18n": {
+        "zh-CN": "数据库连接"
+      },
+      "description_i18n": {
+        "zh-CN": "只读连接 MySQL/PostgreSQL/MongoDB：多环境多连接配置、参数绑定安全查询与结构浏览"
+      },
+      "category": "developer-tools"
+    }
+  ]
+}
